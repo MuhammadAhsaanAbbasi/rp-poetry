@@ -72,7 +72,7 @@ def test_update_main():
 
         client = TestClient(app=app)
         todo_content = "Eating Biryani"
-        response = client.put("/todos/31",
+        response = client.put("/todos/32",
                     json={"content": todo_content,
                     "status": True})
         data = response.json()
@@ -96,7 +96,7 @@ def test_delete_main():
 
         client = TestClient(app=app)
         todo_content = "Eating Biryani"
-        response = client.delete("/todos/31")
+        response = client.delete("/todos/32")
         data = response.json()
         assert response.status_code == 200
         assert data["content"] == todo_content
