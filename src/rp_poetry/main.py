@@ -72,7 +72,7 @@ def delete_todo(todo_id: int, session: Annotated[Session, Depends(get_session)])
     session.delete(todo)
     session.commit()
     return todo
-
+    
 # Create a function that take the id of the todo and update the status of the given id of the todo and return a updated list of the todo
 
 class updateTodo():

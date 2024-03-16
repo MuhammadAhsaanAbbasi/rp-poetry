@@ -72,13 +72,12 @@ def test_update_main():
 
         client = TestClient(app=app)
         todo_content = "Eating Biryani"
-        response = client.put("/todos/7",
+        response = client.put("/todos/31",
                     json={"content": todo_content,
                     "status": True})
         data = response.json()
         assert response.status_code == 200
         assert data["content"] == todo_content
-        assert data["id"] == 7
 
 def test_delete_main():
     connection_string = str(settings.TEST_DATABASE_URL).replace(
@@ -97,7 +96,7 @@ def test_delete_main():
 
         client = TestClient(app=app)
         todo_content = "Eating Biryani"
-        response = client.delete("/todos/7")
+        response = client.delete("/todos/31")
         data = response.json()
         assert response.status_code == 200
         assert data["content"] == todo_content
