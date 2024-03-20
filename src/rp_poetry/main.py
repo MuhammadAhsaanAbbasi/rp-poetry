@@ -5,7 +5,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from rp_poetry import settings
 from fastapi.middleware.cors import CORSMiddleware
 
-class Todo(SQLModel, table = True):
+class Todo(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     content: str =  Field(index=True)
     status: bool = Field(default=False)
