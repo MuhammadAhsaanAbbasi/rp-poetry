@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from typing import Union, Optional, Annotated
 from rp_poetry import settings
 from sqlmodel import Field, Session, SQLModel, create_engine, select
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Body
 
 
 class Todo(SQLModel, table=True):
@@ -379,3 +379,113 @@ async def get_model(model_name: ModelName):
         return {"model_name": model_name, "message": "LeCNN all the images"}
 
     return {"model_name": model_name, "message": "Have some residuals"}
+
+from pydantic import BaseModel
+
+
+class Item(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
+
+
+# @app.put("/items/{item_id}")
+# async def update_item(
+#     *,
+#     item_id: int,
+#     item: Annotated[
+#         Item,
+#         Body(
+#             openapi_examples={
+#                 "normal": {
+#                     "summary": "A normal example",
+#                     "description": "A **normal** item works correctly.",
+#                     "value": {
+#                         "name": "Foo",
+#                         "description": "A very nice Item",
+#                         "price": 35.4,
+#                         "tax": 3.2,
+#                     },
+#                 },
+#                 "converted": {
+#                     "summary": "An example with converted data",
+#                     "description": "FastAPI can convert price `strings` to actual `numbers` automatically",
+#                     "value": {
+#                         "name": "Bar",
+#                         "price": "35.4",
+#                     },
+#                 },
+#                 "invalid": {
+#                     "summary": "Invalid data is rejected with an error",
+#                     "value": {
+#                         "name": "Baz",
+#                         "price": "thirty five point four",
+#                     },
+#                 },
+#             },
+#         ),
+#     ],
+# ):
+#     results = {"item_id": item_id, "item": item}
+#     return results
+
+
+from datetime import datetime, time, timedelta
+from uuid import UUID
+from fastapi import Body, Cookie, Header
+
+# @app.put("/items/{item_id}")
+# async def read_items(
+#     item_id: UUID,
+#     start_datetime: Annotated[datetime | None, Body()] = None,
+#     end_datetime: Annotated[datetime | None, Body()] = None,
+#     repeat_at: Annotated[time | None, Body()] = None,
+#     process_after: Annotated[timedelta | None, Body()] = None,
+# ):
+#     start_process = start_datetime + process_after
+#     duration = end_datetime - start_process
+#     return {
+#         "item_id": item_id,
+#         "start_datetime": start_datetime,
+#         "end_datetime": end_datetime,
+#         "repeat_at": repeat_at,
+#         "process_after": process_after,
+#         "start_process": start_process,
+#         "duration": duration,
+#     }
+
+class User(BaseModel):
+    username: str
+    age: int | None = None
+    email: str | None = None
+    password: str | None = None
+
+@app.put("/items/{item_id}")
+async def read_items(
+    item_id: UUID,
+    item: Annotated[Item, Body()],
+    user: Annotated[User, Body()],
+):
+    results = {"item_id": item_id, "item": item, "user": user}
+    return results
+
+# @app.get("/items")
+# async def get_cookies(
+#     cookie_id: Annotated[str | None, Cookie(description="the id of the cookie")] = None):
+#     return {"cookie_id": cookie_id}
+
+# @app.get("/items")
+# async def get_headers(user_agent: Annotated[str | None, Header()] = None):
+#     return {"User-Agent": user_agent}
+
+# @app.get("/items/")
+# async def get_headers(
+#     strange_header: Annotated[str | None, Header(convert_underscores=False)] = None,
+# ):
+#     return {"strange_header": strange_header}
+
+@app.get("/items/")
+async def get_headers(x_token: Annotated[list[str] | None, Header()] = None):
+    return {"X-Token values": x_token}
+
