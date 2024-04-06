@@ -623,3 +623,192 @@ async def read_item_name(item_id: str):
 @app.get("/items/{item_id}/public", response_model=Item, response_model_exclude={"tax"})
 async def read_item_public_data(item_id: str):
     return items[item_id]
+
+
+from fastapi import File, UploadFile
+
+
+# @app.post("/files/")
+# async def create_file(file: Annotated[bytes, File()]):
+#     return {"file_size": len(file)}
+
+
+# @app.post("/uploadfile/")
+# async def create_upload_file(file: UploadFile):
+#     content = await file.read(size=11)
+#     return {"filename": content}
+
+# @app.post("/files/")
+# async def create_file(file: Annotated[bytes | None, File()] = None):
+#     if not file:
+#         return {"message": "No file sent"}
+#     else:
+#         return {"file_size": len(file)}
+
+
+# @app.post("/uploadfile/")
+# async def create_upload_file(file: UploadFile | None = None):
+#     if not file:
+#         return {"message": "No upload file sent"}
+#     else:
+#         return {"filename": file.filename}
+
+# @app.post("/files/")
+# async def create_file(file: Annotated[bytes, File(description="A file read as bytes")]):
+#     return {"file_size": len(file)}
+
+
+# @app.post("/uploadfile/")
+# async def create_upload_file(
+#     file: Annotated[UploadFile, File(description="A file read as UploadFile")],
+# ):
+#     return {"filename": file.filename}
+
+# @app.post("/files/")
+# async def create_files(files: Annotated[list[bytes], File()]):
+#     return {"file_sizes": [len(file) for file in files]}
+
+
+# @app.post("/uploadfiles/")
+# async def create_upload_files(files: list[UploadFile]):
+#     return {"filenames": [file.filename for file in files]}
+
+# from fastapi.responses import HTMLResponse
+# @app.get("/")
+# async def main():
+#     content = """
+# <body>
+# <form action="/files/" enctype="multipart/form-data" method="post">
+# <input name="files" type="file" multiple>
+# <input type="submit">
+# </form>
+# <form action="/uploadfiles/" enctype="multipart/form-data" method="post">
+# <input name="files" type="file" multiple>
+# <input type="submit">
+# </form>
+# </body>
+#     """
+#     return HTMLResponse(content=content)
+from fastapi import FastAPI, File, Form, UploadFile
+
+@app.post("/files/")
+async def create_file(
+    file: Annotated[bytes, File()],
+    fileb: Annotated[UploadFile, File()],
+    token: Annotated[str, Form()],
+):
+    return {
+        "file_size": len(file),
+        "token": token,
+        "fileb_content_type": fileb.content_type,
+    }
+
+# from fastapi import FastAPI, Request
+# from fastapi.responses import JSONResponse
+
+
+# class UnicornException(Exception):
+#     def __init__(self, name: str):
+#         self.name = name
+
+
+# @app.exception_handler(UnicornException)
+# async def unicorn_exception_handler(request: Request, exc: UnicornException):
+#     return JSONResponse(
+#         status_code=418,
+#         content={"message": f"Oops! {exc.name} did something. There goes a rainbow..."},
+#     )
+
+
+# @app.get("/unicorns/{name}")
+# async def read_unicorn(name: str):
+#     if name == "yolo":
+#         raise UnicornException(name=name)
+#     return {"unicorn_name": name}
+
+# from fastapi import FastAPI, HTTPException
+# from fastapi.exceptions import RequestValidationError
+# from fastapi.responses import PlainTextResponse
+# from starlette.exceptions import HTTPException as StarletteHTTPException
+
+
+# @app.exception_handler(StarletteHTTPException)
+# async def http_exception_handler(request, exc):
+#     return PlainTextResponse(str(exc.detail), status_code=exc.status_code)
+
+
+# @app.exception_handler(RequestValidationError)
+# async def validation_exception_handler(request, exc):
+#     return PlainTextResponse(str(exc), status_code=400)
+
+
+# @app.get("/items/{item_id}")
+# async def read_item(item_id: int):
+#     if item_id == 3:
+#         raise HTTPException(status_code=418, detail="Nope! I don't like 3.")
+#     return {"item_id": item_id}
+
+from enum import Enum
+
+from fastapi import FastAPI
+
+app = FastAPI()
+
+
+class Tags(Enum):
+    items = "items"
+    users = "users"
+
+
+@app.get("/items/", tags=[Tags.items, "other tag"])
+async def get_items():
+    return ["Portal gun", "Plumbus"]
+
+
+@app.get("/users/", tags=[Tags.users])
+async def read_users():
+    return ["Rick", "Morty"]
+
+
+class Item(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
+    tags: set[str] = set()
+
+
+# @app.post("/items/", response_model=Item, summary="Create an item")
+# async def create_item(item: Item):
+#     """
+#     Create an item with all the information:
+
+#     - **name**: each item must have a name
+#     - **description**: a long description
+#     - **price**: required
+#     - **tax**: if the item doesn't have tax, you can omit this
+#     - **tags**: a set of unique tag strings for this item
+#     """
+#     return item
+
+@app.get("/elements/", tags=["items"], deprecated=True)
+async def read_elements():
+    return [{"item_id": "Foo"}]
+
+@app.post(
+    "/items/",
+    response_model=Item,
+    summary="Create an item",
+    response_description="The created item",
+)
+async def create_item(item: Item):
+    """
+    Create an item with all the information:
+
+    - **name**: each item must have a name
+    - **description**: a long description
+    - **price**: required
+    - **tax**: if the item doesn't have tax, you can omit this
+    - **tags**: a set of unique tag strings for this item
+    """
+    return item
